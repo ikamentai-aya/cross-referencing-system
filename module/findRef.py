@@ -1,6 +1,17 @@
 #ページ数をもらうとその中のfigureの位置を知らせる
 import pickle
 from module.highlight import highlight
+import re
+
+#lの単語のいずれかがsに含まれているかの確認
+def figTableIn(n, s):
+  word_list = [f'figure{n}', f'fig{n}', f'table{n}']
+  isIn = False
+  for word in word_list:
+    if word in s.lower().replace(' ', '').replace('.', ''):
+      isIn = True
+  return isIn
+
 
 def findClickedFigure(page, x, y, figure_area_dict, file_name):
   print(x,y)
@@ -28,7 +39,9 @@ def findRefSpace(page, x, y, file_name, width, height):
   if name == None: return None, ''
   ref = []
   for i, c in enumerate(content):
-    if name in c.lower():
+    name_num = re.search(r'[0-9]+', name).group(0)
+    # if name in c.lower():
+    if figTableIn(name_num, c):
       ref.append(i)
 
   ##セクションタイトルの取得

@@ -16,7 +16,7 @@
           Select paper.
         </v-subheader>
       </v-col>
-      <v-col cols="4">
+      <v-col cols="3">
         <v-select
           v-model="select"
           @change = 'selectFile'
@@ -29,6 +29,16 @@
           return-object
           single-line
         ></v-select>
+      </v-col>
+      <v-col cols="1">
+        <v-btn
+          class="ma-2"
+          outlined
+          color="indigo"
+          @click="fileImport"
+        >
+          Add new files
+        </v-btn>
       </v-col>
       <v-col cols='4' align='right'>
         <v-btn depressed color="primary" @click="decideFile">select</v-btn>
@@ -123,6 +133,9 @@ export default {
         this.sendSelectFile(payload);
         window.location.href = '/report';
       }
+    },
+    fileImport() {
+      window.location.href = '/import';
     },
   },
   created() {

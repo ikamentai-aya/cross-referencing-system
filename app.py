@@ -13,6 +13,7 @@ from module.clusterInfo import createClusterTable
 from module.findRef import findRefSpace
 from module.findParagraph import findParagraph
 from module.importGraphLayout import importGraphLayout
+from module.preprocess.preprocessing import preprocessing
 
 # configuration
 DEBUG = True
@@ -57,7 +58,7 @@ def report():
     select_report_path = f'/static/static/{SELECTFILE}/report_content/content'
 
     ##ページが何ページあるか取得
-    report_page_list = sorted(glob.glob(f'dist/static/static/{SELECTFILE}/report_content/*.txt'))
+    report_page_list = sorted(glob.glob(f'dist/static/static/{SELECTFILE}/report_content/content/*.jpg'))
     report_page_list = [p.split('/')[-1].split('.')[0] for p in report_page_list]
     report_page = max(report_page_list)
 
@@ -125,8 +126,10 @@ def report():
     for g in sorted(group.keys()):
       cluster_group.append({'color':'white', 'index':g, 'name':g})
 
+    VIDEOLINK = ''
+    if SELECTFILE in video_link: VIDEOLINK= video_link[SELECTFILE]
     response_data = {'filename':SELECTFILE, 'slide_files':return_slide_files, 'audio_content':new_audio_content, 'select_report':select_report_path,
-      'video_link':video_link[SELECTFILE], 'heatmap_data':heatmap_data, 'cluster_data':new_cluster, 'heat_map_label':list(range(len(content))),
+      'video_link':VIDEOLINK, 'heatmap_data':heatmap_data, 'cluster_data':new_cluster, 'heat_map_label':list(range(len(content))),
       'cluster_group':cluster_group, 'section_title':section_title, 'report_title':report_title,'cluster_slide_path':cluster_slide_path, 'report_page':report_page}
     #, 'heatmap_data':heatmap_data
 
@@ -309,7 +312,33 @@ def note_delete():
       pickle.dump(note_info, f)
   return jsonify({'message':'メモを消去しました'})
   
+@app.route('/uploadFile', methods=['POST'])
+def importFile():
+  pdf = request.files['userpdf']
+  video = request.files['uservideo']
+  json = request.files['userjson']
+  name = request.form['name']
+  bib = request.form['bibtex']
   
+  os.mkdir(f'dist/static/static/{name}')
+  os.mkdir(f'dist/static/static/{name}/video_content')
+  os.mkdir(f'dist/static/static/{name}/report_content')
+
+  path = f'dist/static/static/{name}/'
+  pdf.save(f'{path}{name}.pdf')
+  video.save(f'{path}{name}.mp4')
+  json.save(f'{path}video_content/audio-transcribe.json')
+  
+  # print(post_data['video'])
+  preprocessing(name)
+  bib_before = ','.join(bib.split(',')[:-1])
+  bib_after = bib.split(',')[-1]
+  new_bib = f'{bib_before}, filename = '+'{'+name+'}'+f',{bib_after}'
+  with open('dist/static/static/session8.bib', mode="a") as f:
+    f.write(f'{new_bib}\n')
+  
+  
+  return jsonify({'text':'テキスト'})
 
 
 if __name__=='__main__':

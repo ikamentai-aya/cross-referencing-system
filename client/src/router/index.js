@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import StartComponent from '../components/Start.vue';
+import importFile from '../components/importFile.vue';
 import ReportComponent from '../components/Report.vue';
 // import WordCloudComponent from '../components/WordCloud.vue';
 import ClusterHeatmap from '../components/ClusterHeatmap.vue';
@@ -25,6 +26,11 @@ export default new Router({
       path: '/zoom',
       name: 'Clustercomponent',
       component: ClusterHeatmap,
+    },
+    {
+      path: '/import',
+      name: 'importFile',
+      component: importFile,
     },
   ],
 });
