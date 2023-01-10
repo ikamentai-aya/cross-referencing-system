@@ -381,7 +381,7 @@ export default {
           this.reportTitle = res.data.report_title;
           this.fileName = res.data.filename;
           this.items = res.data.slide_files;
-          this.report_max_page = res.data.report_page - 1;
+          this.report_max_page = res.data.report_page;
           const [first1] = this.items;
           this.selectSlide = first1;
           this.slide_length = res.data.audio_content.length;
@@ -715,10 +715,14 @@ export default {
           } else if (e.offsetX < el.clientWidth * 0.2) {
             // 左端をクリックした時→前のページへ飛ぶ
             this.movePrevPage();
-          } else if (e.offsetX > el.clientWidth * 0.8) {
-            // 右端をクリックした時->後のページへ飛ぶ
+          } else {
+            console.log('右へ移動');
             this.moveNextPage();
           }
+          // else if (e.offsetX > el.clientWidth * 0.5) {
+          //   // 右端をクリックした時->後のページへ飛ぶ
+          //   this.moveNextPage();
+          // }
         })
         .catch((error) => {
           // eslint-diable-next-line
@@ -842,6 +846,7 @@ export default {
         .style('stroke-width', 2);
     },
     moveNextPage() {
+      console.log(this.report_page, this.report_max_page);
       if (this.report_page < this.report_max_page) this.report_page += 1;
       this.select_report_path = `${this.report_basic_path}/${this.report_page}.jpg`;
       this.not_paragraph = false;

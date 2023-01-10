@@ -12,7 +12,7 @@
           color="indigo"
           @click="cancel"
         >
-          CANCEL
+          {{backDisplay}}
         </v-btn>
       </v-col>
       <v-col cols="3"></v-col>
@@ -65,25 +65,32 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="4">
+      <v-col cols="3">
         <v-file-input
           accept=".pdf"
           label="report input"
           v-model="pdf"
         ></v-file-input>
       </v-col>
-      <v-col cols="4">
+      <v-col cols="3">
         <v-file-input
           accept="video/*"
           label="video input"
           v-model="video"
         ></v-file-input>
       </v-col>
-      <v-col cols="4">
+      <v-col cols="3">
         <v-file-input
           accept=".json"
           label="Audio Transcript Input"
           v-model="json"
+        ></v-file-input>
+      </v-col>
+      <v-col cols="3">
+        <v-file-input
+          accept="video/*"
+          label="preview video"
+          v-model="preview"
         ></v-file-input>
       </v-col>
     </v-row>
@@ -108,9 +115,11 @@ export default {
       pdf: '',
       video: '',
       json: '',
+      preview: '',
       isAlert: false,
       isProcess: false,
       isComplete: false,
+      backDisplay: 'cancel',
     };
   },
   methods: {
@@ -120,7 +129,7 @@ export default {
     selectFile() {
       console.log(this.video);
       if (this.video === '' || this.pdf === '' || this.json === '' || this.name === ''
-        || this.bib === '') {
+        || this.bib === '' || this.preview === '') {
         console.log('error');
         this.isAlert = true;
       } else {
@@ -139,6 +148,7 @@ export default {
         params.append('userpdf', this.pdf);
         params.append('uservideo', this.video);
         params.append('userjson', this.json);
+        params.append('userpreview', this.preview);
         params.append('name', this.name);
         params.append('bibtex', this.bib);
         const path = '/uploadFile';
@@ -149,14 +159,17 @@ export default {
         this.json = '';
         this.name = '';
         this.bib = '';
+        this.preview = '';
         axios.post(path, params)
           .then((res) => {
             console.log(res.data);
             this.isProcess = false;
             this.isComplete = true;
+            this.backDisplay = 'home';
           })
           .catch((error) => {
             // eslint-diable-next-line
+            this.isAlert = true;
             console.error(error);
           });
       }

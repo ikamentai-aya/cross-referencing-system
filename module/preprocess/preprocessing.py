@@ -2,6 +2,7 @@ from module.preprocess.createFolder import createFolder
 
 from module.preprocess.deriveReportContent import deriveReport
 from module.preprocess.deriveReportFigure import deriveFigure
+from module.preprocess.createContent import createContent
 from module.preprocess.devideAreaByParagraph import deriveArea
 from module.preprocess.selectReportFigure import makeCorrectFigure
 
@@ -31,6 +32,7 @@ def reportProcess(file_name):
     deriveReport(paper_path)
     #論文から図表の抽出
     deriveFigure(paper_path)
+    createContent(file_name)
     coodinate_path = f'dist/static/static/{file_name}/report_content/content/path_coordinate.pickle'
     content_path = f'dist/static/static/{file_name}/report_content/content.pickle'
     deriveArea(coodinate_path, content_path)

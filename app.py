@@ -59,8 +59,9 @@ def report():
 
     ##ページが何ページあるか取得
     report_page_list = sorted(glob.glob(f'dist/static/static/{SELECTFILE}/report_content/content/*.jpg'))
-    report_page_list = [p.split('/')[-1].split('.')[0] for p in report_page_list]
+    report_page_list = [int(p.split('/')[-1].split('.')[0]) for p in report_page_list]
     report_page = max(report_page_list)
+    print(report_page, report_page_list)
 
     return_slide_files = [f'/static/static/{SELECTFILE}/video_content/correct_slides/{name}' for name in slide_names]
 
@@ -126,6 +127,7 @@ def report():
     for g in sorted(group.keys()):
       cluster_group.append({'color':'white', 'index':g, 'name':g})
 
+    print(report_page)
     VIDEOLINK = ''
     if SELECTFILE in video_link: VIDEOLINK= video_link[SELECTFILE]
     response_data = {'filename':SELECTFILE, 'slide_files':return_slide_files, 'audio_content':new_audio_content, 'select_report':select_report_path,
@@ -259,7 +261,7 @@ def note_info():
   
   return jsonify({'content':content, 'section_list':section_list,  'section_head':section_head_list, 'section_structure':section_structure,
     'figure_name_list':figure_name_list, 'figure_path_list':figure_path_list, 'file':SELECTFILE, 'word_list':word_list, 'slide_files':new_slide_files,
-    'total_section_structure':total_section_structure})
+    'total_section_structure':total_section_structure, 'report_max_page':len(report_page_list)})
   
 # メモを保存する関数
 @app.route('/note_save', methods=['POST'])
@@ -317,17 +319,20 @@ def importFile():
   pdf = request.files['userpdf']
   video = request.files['uservideo']
   json = request.files['userjson']
+  preview = request.files['userjson']
   name = request.form['name']
   bib = request.form['bibtex']
   
   os.mkdir(f'dist/static/static/{name}')
   os.mkdir(f'dist/static/static/{name}/video_content')
+  os.mkdir(f'dist/static/static/{name}/preview')
   os.mkdir(f'dist/static/static/{name}/report_content')
 
   path = f'dist/static/static/{name}/'
   pdf.save(f'{path}{name}.pdf')
   video.save(f'{path}{name}.mp4')
   json.save(f'{path}video_content/audio-transcribe.json')
+  preview.save(f'{path}preview/{name}.mp4')
   
   # print(post_data['video'])
   preprocessing(name)
@@ -336,7 +341,10 @@ def importFile():
   new_bib = f'{bib_before}, filename = '+'{'+name+'}'+f',{bib_after}'
   with open('dist/static/static/session8.bib', mode="a") as f:
     f.write(f'{new_bib}\n')
-  
+
+  note_info = dict()
+  with open(f'dist/static/static/{name}/note.pickle', mode='wb') as f:
+    pickle.dump(note_info, f)
   
   return jsonify({'text':'テキスト'})
 

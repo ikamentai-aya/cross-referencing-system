@@ -18,7 +18,7 @@ def findSimilarImg(path, img_tile):
             result_index = findSimilarSubImg(part_img, img_tile)
             result_index_set = set(result_index)|result_index_set
         
-    return result_index
+    return result_index_set
 
 def findSimilarSubImg(img, img_tile):
     H, W, C = img_tile.shape

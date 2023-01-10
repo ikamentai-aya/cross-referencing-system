@@ -8,7 +8,6 @@ import re
 import statistics
 import glob
 
-
 # 各領域に所属する段落を発見し、発見したらそのインデックスを返す
 def findAreaIndex(path_coordinate_dict, path_text_dict, content, section_title):
   area_index = dict()
@@ -20,53 +19,47 @@ def findAreaIndex(path_coordinate_dict, path_text_dict, content, section_title):
       path_text_words[path] = set(path_text_dict[path].split())
       
   #一番一致する単語数の多い領域に包含されていると考える
+  ok = list(range(len(content)))
   for i, c in enumerate(content):
       isIn = False
       if len(c) < 30: continue
-      sub_string = round(len(c)*0.8)
       for path in path_coordinate_dict:
-          if not '.' in path_text_dict[path]:continue
-          if c[:40] in path_text_dict[path][:50]:
-              # if '3-0' in path: print(path_text_dict[path])
-              area_index[path].append(i)
-              isIn = True
-              break
-      if not isIn:
-          for path in path_coordinate_dict:
-              if not '.' in path_text_dict[path]:continue
-              if c[10:50] in path_text_dict[path]:
-                  # if '3-0' in path: 
-                  #   print('------\n'+path_text_dict[path]+'------\n')
-                  # if i== 12:
-                  #     print(c)
-                  area_index[path].append(i)
-                  isIn = True
-                  break
-      if not isIn: 
-          for path in path_coordinate_dict:
-              if not '.' in path_text_dict[path]:continue
-              if c[10:50] in path_text_dict[path].replace('\n', ' '):
-                  # if '3-0' in path: 
-                  #   print('------\n'+path_text_dict[path]+'------\n')
-                  # if i== 12:
-                  #     print(c)
-                  area_index[path].append(i)
-                  isIn = True
-                  break
-      # if not isIn: print(c)
-
+        if not '.' in path_text_dict[path]:continue #明らかに段落じゃない領域は飛ばす
+        word_set = set(path_text_dict[path].replace(',', '').replace('.', '').split())
+        content_word_set = set(c.replace(',', '').replace('.', '').split())
+        kyoutu_word_set = list(word_set & content_word_set)
+        if len(c) < 75:
+            if c in path_text_dict[path]:
+                area_index[path].append(i)
+                isIn = True
+                ok[i] = '-'
+                break
+        elif len(kyoutu_word_set)/ len(list(word_set)) > 0.8 or len(kyoutu_word_set)/ len(list(content_word_set)) > 0.8:
+            area_index[path].append(i)
+            isIn = True
+            ok[i] = '-'
+            break
+  
+  for i in ok:
+    if i != '-':print(f'{i}:{content[i]}')
   #section_titleが入っている可能性も鑑みる
   for s in section_title: 
     for path in path_coordinate_dict:
       if s[0] in path_text_dict[path]:
           area_section_index[path].append(s[0])
           break
+  for path in area_index:
+    print(path, area_index[path])
 
   return area_index, area_section_index
 
 # 各領域を段落の行数から分割する
 def splitArea(path_coordinate_dict, path_text_dict, content, path, index_list, save_path, section_index):
+    
+  #pathに存在する画像を読み込む
   img = cv2.imread(path)
+  new_area_index = dict()
+  if img is None: return path_coordinate_dict, new_area_index
   height, width, channels = img.shape[:3]
   file_name = path.split('/')[-1].split('.')[0]
   
@@ -83,7 +76,9 @@ def splitArea(path_coordinate_dict, path_text_dict, content, path, index_list, s
   for line in line_list:
     for index in index_list:
       c = content[index]
-      if c[:20] in line or c[10:30] in line: 
+      #if c[:20] in line or c[10:30] in line:
+      top = ' '.join(c.split()[:3])
+      if top in line:
         area_txt = area_txt.replace(line, f'\n{line}')
 
   #if len(section_index) > 0:print(area_txt)
@@ -130,8 +125,7 @@ def splitArea(path_coordinate_dict, path_text_dict, content, path, index_list, s
         # print(new_area_index)
     
   return new_path_coordinate_dict, new_area_index
-  
-
+ 
 ##このモジュールのメイン関数
 def deriveArea(coodinate_path, content_path):
   with open(coodinate_path, mode='rb') as f:
