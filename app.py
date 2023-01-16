@@ -244,8 +244,9 @@ def note_info():
   section_list = [] # セクションタイトルのリスト
   section_head_list = dict() # 各セクションの最初の一行
   for [title, index] in section_title:
-    section_list.append(title)
-    section_head_list[title] = '.'.join(content[index].split('.')[:2])+'...'
+    if index<len(content):
+      section_list.append(title)
+      section_head_list[title] = '.'.join(content[index].split('.')[:2])+'...'
   # 図表のリストを取得する
   figure_list = sorted(glob.glob(f'dist/static/static/{SELECTFILE}/report_content/figure/*.jpg'))
   figure_name_list = [path.split('/')[-1].split('.')[0] for path in figure_list]
